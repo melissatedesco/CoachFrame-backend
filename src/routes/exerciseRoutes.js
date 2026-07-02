@@ -5,7 +5,8 @@ import { validate, rules } from '../middlewares/validate.js'
 import {
     getAllExercises, getExerciseById,
     createExercise, updateExercise, deleteExercise,
-    addEquipmentToExercise, removeEquipmentFromExercise
+    addEquipmentToExercise, removeEquipmentFromExercise,
+    getEffectiveRules,
 } from '../controllers/exerciseController.js'
 
 const router = express.Router()
@@ -18,6 +19,7 @@ const exerciseValidation = validate([
 
 // rotte accessibili a tutti gli utenti loggati
 router.get('/', protect, getAllExercises)
+router.get('/:id/rules', protect, getEffectiveRules)
 router.get('/:id', protect, getExerciseById)
 
 // rotte admin + trainer (con ownership check nel controller per i trainer)

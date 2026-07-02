@@ -14,9 +14,13 @@ vi.mock('../../models/sessionModel.js', () => ({
         getStats: vi.fn()
     }
 }))
+vi.mock('../../models/sessionSetsModel.js', () => ({
+    default: { add: vi.fn(), getBySessionExercise: vi.fn() }
+}))
 vi.mock('../../config/db.js', () => ({ default: {} }))
 
 import Session from '../../models/sessionModel.js'
+import SessionSets from '../../models/sessionSetsModel.js'
 import sessionRoutes from '../../routes/sessionRoutes.js'
 
 const SECRET = 'super_secret_key_per_i_token_jwt'
@@ -82,6 +86,7 @@ describe('PATCH /api/sessions/:id/close', () => {
     })
 
     it('risponde 200 e chiude la sessione', async () => {
+        Session.findById.mockResolvedValue(sessioneMock)
         Session.close.mockResolvedValue(true)
 
         const res = await request(app)
@@ -166,6 +171,7 @@ describe('POST /api/sessions/:id/exercises', () => {
     })
 
     it('risponde 201 con esercizio registrato', async () => {
+        Session.findById.mockResolvedValue(sessioneMock)
         Session.addExercise.mockResolvedValue(10)
 
         const res = await request(app)
@@ -194,5 +200,107 @@ describe('GET /api/sessions/stats', () => {
         expect(res.status).toBe(200)
         expect(res.body.total_sessions).toBe(10)
         expect(res.body).toHaveProperty('weekly')
+    })
+})
+
+describe('POST /api/sessions/:sessionId/exercises/:seId/sets', () => {
+    beforeEach(() => vi.clearAllMocks())
+
+    it('risponde 401 senza token', async () => {
+        const res = await request(app).post('/api/sessions/1/exercises/1/sets').send({})
+        expect(res.status).toBe(401)
+    })
+
+    it('risponde 400 se mancano set_number o reps_done', async () => {
+        const res = await request(app)
+            .post('/api/sessions/1/exercises/1/sets')
+            .set('Authorization', `Bearer ${tokenUser}`)
+            .send({ set_number: 1 })
+
+        expect(res.status).toBe(400)
+    })
+
+    it('risponde 404 se la sessione non esiste', async () => {
+        Session.findById.mockResolvedValue(null)
+
+        const res = await request(app)
+            .post('/api/sessions/999/exercises/1/sets')
+            .set('Authorization', `Bearer ${tokenUser}`)
+            .send({ set_number: 1, reps_done: 10 })
+
+        expect(res.status).toBe(404)
+    })
+
+    it('risponde 403 se la sessione appartiene a un altro utente', async () => {
+        Session.findById.mockResolvedValue({ ...sessioneMock, user_id: 99 })
+
+        const res = await request(app)
+            .post('/api/sessions/1/exercises/1/sets')
+            .set('Authorization', `Bearer ${tokenUser}`)
+            .send({ set_number: 1, reps_done: 10 })
+
+        expect(res.status).toBe(403)
+    })
+
+    it('risponde 201 e salva i dati del set con angle_data', async () => {
+        Session.findById.mockResolvedValue(sessioneMock)
+        SessionSets.add.mockResolvedValue(5)
+
+        const res = await request(app)
+            .post('/api/sessions/1/exercises/1/sets')
+            .set('Authorization', `Bearer ${tokenUser}`)
+            .send({ set_number: 1, reps_done: 10, angle_data: { knee_min: 95 }, form_score: 85 })
+
+        expect(res.status).toBe(201)
+        expect(res.body.id).toBe(5)
+        expect(SessionSets.add).toHaveBeenCalledWith('1', 1, 10, { knee_min: 95 }, 85)
+    })
+})
+
+describe('GET /api/sessions/:sessionId/exercises/:seId/sets', () => {
+    beforeEach(() => vi.clearAllMocks())
+
+    it('risponde 401 senza token', async () => {
+        const res = await request(app).get('/api/sessions/1/exercises/1/sets')
+        expect(res.status).toBe(401)
+    })
+
+    it('risponde 404 se la sessione non esiste', async () => {
+        Session.findById.mockResolvedValue(null)
+
+        const res = await request(app)
+            .get('/api/sessions/999/exercises/1/sets')
+            .set('Authorization', `Bearer ${tokenUser}`)
+
+        expect(res.status).toBe(404)
+    })
+
+    it('risponde 200 per il proprietario della sessione', async () => {
+        Session.findById.mockResolvedValue(sessioneMock)
+        SessionSets.getBySessionExercise.mockResolvedValue([
+            { id: 1, set_number: 1, reps_done: 10, angle_data: { knee_min: 95 }, form_score: 85 }
+        ])
+
+        const res = await request(app)
+            .get('/api/sessions/1/exercises/1/sets')
+            .set('Authorization', `Bearer ${tokenUser}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body).toHaveLength(1)
+        expect(res.body[0].form_score).toBe(85)
+    })
+
+    it('risponde 200 per il trainer', async () => {
+        Session.findById.mockResolvedValue({ ...sessioneMock, user_id: 99 })
+        SessionSets.getBySessionExercise.mockResolvedValue([
+            { id: 1, set_number: 1, reps_done: 10, angle_data: {}, form_score: 80 }
+        ])
+
+        const res = await request(app)
+            .get('/api/sessions/1/exercises/1/sets')
+            .set('Authorization', `Bearer ${tokenAdmin}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body).toHaveLength(1)
     })
 })
