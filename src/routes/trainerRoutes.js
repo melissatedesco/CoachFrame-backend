@@ -6,6 +6,7 @@ import {
     getClientStats, getClientSessions,
     assignProgram, removeAssignment, getClientAssignments,
     getOverview, getClientProgress,
+    getClientRules, upsertClientRule, deleteClientRule,
 } from '../controllers/trainerController.js'
 
 const router = Router()
@@ -29,5 +30,10 @@ router.get('/clients/:clientId/progress',              getClientProgress)
 // assegnazione programmi
 router.post('/clients/:clientId/assign/:programId',    assignProgram)
 router.delete('/assignments/:assignmentId',            removeAssignment)
+
+// regole d'angolo personalizzate (RF-AI1)
+router.get('/clients/:clientId/rules',                 getClientRules)
+router.put('/clients/:clientId/rules/:exerciseId',     upsertClientRule)
+router.delete('/clients/:clientId/rules/:exerciseId',  deleteClientRule)
 
 export default router

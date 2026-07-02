@@ -1,4 +1,5 @@
 import Trainer from '../models/trainerModel.js'
+import TrainerRules from '../models/trainerRulesModel.js'
 
 export const getClients = async (req, res, next) => {
     try {
@@ -88,5 +89,41 @@ export const getClientAssignments = async (req, res, next) => {
         if (!isMine && req.user.role !== 'admin') return res.status(403).json({ message: 'Accesso negato.' })
         const assignments = await Trainer.getClientAssignments(clientId)
         res.json(assignments)
+    } catch (e) { next(e) }
+}
+
+// GET /api/trainer/clients/:clientId/rules — tutte le regole personalizzate del cliente
+export const getClientRules = async (req, res, next) => {
+    try {
+        const { clientId } = req.params
+        const isMine = await Trainer.isMyClient(req.user.id, clientId)
+        if (!isMine && req.user.role !== 'admin') return res.status(403).json({ message: 'Accesso negato.' })
+        const rules = await TrainerRules.getForClient(req.user.id, clientId)
+        res.json(rules)
+    } catch (e) { next(e) }
+}
+
+// PUT /api/trainer/clients/:clientId/rules/:exerciseId — crea o aggiorna regola
+export const upsertClientRule = async (req, res, next) => {
+    try {
+        const { clientId, exerciseId } = req.params
+        const { rules } = req.body
+        if (!rules || !Array.isArray(rules)) {
+            return res.status(400).json({ message: 'Il campo "rules" deve essere un array.' })
+        }
+        const isMine = await Trainer.isMyClient(req.user.id, clientId)
+        if (!isMine && req.user.role !== 'admin') return res.status(403).json({ message: 'Accesso negato.' })
+        await TrainerRules.upsert(req.user.id, clientId, exerciseId, rules)
+        res.json({ message: 'Regola salvata.' })
+    } catch (e) { next(e) }
+}
+
+// DELETE /api/trainer/clients/:clientId/rules/:exerciseId — rimuovi regola
+export const deleteClientRule = async (req, res, next) => {
+    try {
+        const { clientId, exerciseId } = req.params
+        const ok = await TrainerRules.delete(req.user.id, clientId, exerciseId)
+        if (!ok) return res.status(404).json({ message: 'Regola non trovata.' })
+        res.json({ message: 'Regola rimossa.' })
     } catch (e) { next(e) }
 }

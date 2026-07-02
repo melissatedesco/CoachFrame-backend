@@ -5,7 +5,7 @@ import db from './config/db.js'
 
 const users = [
     { name: 'Admin',    surname: 'FitFrame', email: 'admin@fitframe.it',   password: 'Admin123!',  role: 'admin' },
-    { name: 'Melissa',  surname: 'Tedesco',  email: 'melissa@fitframe.it', password: 'User123!',   role: 'user'  },
+    { name: 'Melissa',  surname: 'Tedesco',  email: 'melissa@fitframe.it', password: 'User123!',   role: 'trainer' },
     { name: 'Marco',    surname: 'Bianchi',  email: 'marco@fitframe.it',   password: 'User123!',   role: 'user'  },
     { name: 'Sofia',    surname: 'Ricci',    email: 'sofia@fitframe.it',   password: 'User123!',   role: 'user'  },
 ]

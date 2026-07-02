@@ -1,4 +1,5 @@
 import Exercise from '../models/exerciseModel.js'
+import TrainerRules from '../models/trainerRulesModel.js'
 
 export const getAllExercises = async (req, res, next) => {
     try {
@@ -69,5 +70,21 @@ export const removeEquipmentFromExercise = async (req, res, next) => {
         }
         await Exercise.removeEquipment(req.params.id, req.params.equipmentId)
         res.json({ message: 'Attrezzo rimosso dall\'esercizio.' })
+    } catch (e) { next(e) }
+}
+
+// GET /api/exercises/:id/rules — regole effettive per l'utente loggato (RF-AI1)
+// Restituisce l'override del trainer se esiste, altrimenti angle_rules di default
+export const getEffectiveRules = async (req, res, next) => {
+    try {
+        const exercise = await Exercise.findById(req.params.id)
+        if (!exercise) return res.status(404).json({ message: 'Esercizio non trovato.' })
+
+        const override = await TrainerRules.getForUser(req.user.id, req.params.id)
+        res.json({
+            exercise_id: exercise.id,
+            rules: override ?? exercise.angle_rules ?? [],
+            source: override ? 'trainer' : 'default',
+        })
     } catch (e) { next(e) }
 }

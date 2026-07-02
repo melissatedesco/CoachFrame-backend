@@ -1,0 +1,403 @@
+### FitFrame API — REST Client (VS Code)
+### Installa l'estensione "REST Client" (humao.rest-client) per usare questo file
+
+@base = http://localhost:5000/api
+
+### Dopo il login, copia il token qui:
+@token = INCOLLA_IL_TOKEN_QUI
+@trainerToken = INCOLLA_IL_TOKEN_TRAINER_QUI
+
+# =============================================================
+# AUTH
+# =============================================================
+
+### Registrazione
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test",
+  "surname": "Utente",
+  "email": "test@fitframe.it",
+  "password": "Test1234!"
+}
+
+###
+
+### Login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "marco@fitframe.it",
+  "password": "User123!"
+}
+
+###
+
+### Login trainer
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "melissa@fitframe.it",
+  "password": "User123!"
+}
+
+###
+
+### Login admin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@fitframe.it",
+  "password": "Admin123!"
+}
+
+###
+
+### Logout
+POST {{base}}/auth/logout
+Authorization: Bearer {{token}}
+
+###
+
+### Forgot password
+POST {{base}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "marco@fitframe.it"
+}
+
+###
+
+### Reset password (usa il token ricevuto via email)
+POST {{base}}/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "TOKEN_DA_EMAIL",
+  "password": "NuovaPassword1!"
+}
+
+# =============================================================
+# UTENTI
+# =============================================================
+
+### Profilo utente corrente
+GET {{base}}/users/me
+Authorization: Bearer {{token}}
+
+###
+
+### Aggiorna profilo
+PUT {{base}}/users/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Marco",
+  "surname": "Bianchi"
+}
+
+# =============================================================
+# ATTREZZATURA
+# =============================================================
+
+### Lista attrezzatura disponibile
+GET {{base}}/equipment
+Authorization: Bearer {{token}}
+
+###
+
+### Attrezzatura posseduta dall'utente
+GET {{base}}/equipment/mine
+Authorization: Bearer {{token}}
+
+###
+
+### Aggiungi attrezzo
+POST {{base}}/equipment/mine/1
+Authorization: Bearer {{token}}
+
+###
+
+### Rimuovi attrezzo
+DELETE {{base}}/equipment/mine/1
+Authorization: Bearer {{token}}
+
+# =============================================================
+# ESERCIZI
+# =============================================================
+
+### Lista tutti gli esercizi
+GET {{base}}/exercises
+Authorization: Bearer {{token}}
+
+###
+
+### Filtra per gruppo muscolare
+GET {{base}}/exercises?muscle_group=gambe
+Authorization: Bearer {{token}}
+
+###
+
+### Filtra per difficoltà
+GET {{base}}/exercises?difficulty=principiante
+Authorization: Bearer {{token}}
+
+###
+
+### Filtra per attrezzatura posseduta
+GET {{base}}/exercises?my_equipment=true
+Authorization: Bearer {{token}}
+
+###
+
+### Dettaglio esercizio
+GET {{base}}/exercises/1
+Authorization: Bearer {{token}}
+
+###
+
+### Regole angolari effettive per l'utente (override trainer o default) — RF-AI1
+GET {{base}}/exercises/1/rules
+Authorization: Bearer {{token}}
+
+###
+
+### Crea esercizio (trainer/admin)
+POST {{base}}/exercises
+Authorization: Bearer {{trainerToken}}
+Content-Type: application/json
+
+{
+  "name": "Squat bulgaro",
+  "description": "Variante avanzata dello squat.",
+  "muscle_group": "gambe",
+  "difficulty": "avanzato",
+  "angle_rules": [
+    { "joint": "knee", "min": 70, "max": 175, "phase": "down", "side": "both" }
+  ]
+}
+
+# =============================================================
+# SCHEDE / PROGRAMMI
+# =============================================================
+
+### Lista schede
+GET {{base}}/programs
+Authorization: Bearer {{token}}
+
+###
+
+### Lista schede filtrate per attrezzatura
+GET {{base}}/programs?filterByEquipment=true
+Authorization: Bearer {{token}}
+
+###
+
+### Dettaglio scheda
+GET {{base}}/programs/1
+Authorization: Bearer {{token}}
+
+###
+
+### Crea scheda
+POST {{base}}/programs
+Authorization: Bearer {{trainerToken}}
+Content-Type: application/json
+
+{
+  "name": "Full Body Custom",
+  "description": "Scheda personalizzata",
+  "difficulty": "intermedio",
+  "duration_weeks": 8,
+  "sessions_per_week": 3
+}
+
+# =============================================================
+# SESSIONI
+# =============================================================
+
+### Avvia sessione
+POST {{base}}/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "program_id": 1
+}
+
+###
+
+### Avvia sessione libera (senza scheda)
+POST {{base}}/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{}
+
+###
+
+### Chiudi sessione
+PATCH {{base}}/sessions/1/close
+Authorization: Bearer {{token}}
+
+###
+
+### Storico sessioni
+GET {{base}}/sessions
+Authorization: Bearer {{token}}
+
+###
+
+### Statistiche aggregate
+GET {{base}}/sessions/stats
+Authorization: Bearer {{token}}
+
+###
+
+### Dettaglio sessione
+GET {{base}}/sessions/1
+Authorization: Bearer {{token}}
+
+###
+
+### Log esercizio in sessione
+POST {{base}}/sessions/1/exercises
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "exercise_id": 1,
+  "sets_done": 3,
+  "reps_done": 10,
+  "form_score": 85
+}
+
+###
+
+### Salva dati di una serie con angoli MediaPipe — RF-AI2
+POST {{base}}/sessions/1/exercises/1/sets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "set_number": 1,
+  "reps_done": 10,
+  "angle_data": {
+    "knee_min": 95,
+    "knee_avg": 108,
+    "failures": [{ "rep": 3, "angle": 115 }]
+  },
+  "form_score": 82
+}
+
+###
+
+### Dettaglio serie (visibile al trainer) — RF-AI2
+GET {{base}}/sessions/1/exercises/1/sets
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Trend storico di un esercizio
+GET {{base}}/sessions/exercises/1/history
+Authorization: Bearer {{token}}
+
+# =============================================================
+# TRAINER
+# =============================================================
+
+### Overview clienti
+GET {{base}}/trainer/overview
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Lista clienti
+GET {{base}}/trainer/clients
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Aggiungi cliente per email
+POST {{base}}/trainer/clients
+Authorization: Bearer {{trainerToken}}
+Content-Type: application/json
+
+{
+  "email": "marco@fitframe.it"
+}
+
+###
+
+### Rimuovi cliente
+DELETE {{base}}/trainer/clients/3
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Stats di un cliente
+GET {{base}}/trainer/clients/3/stats
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Sessioni di un cliente
+GET {{base}}/trainer/clients/3/sessions
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Progressi dettagliati di un cliente
+GET {{base}}/trainer/clients/3/progress
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Schede assegnate a un cliente
+GET {{base}}/trainer/clients/3/assignments
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Assegna scheda a un cliente
+POST {{base}}/trainer/clients/3/assign/1
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Rimuovi assegnazione scheda
+DELETE {{base}}/trainer/assignments/1
+Authorization: Bearer {{trainerToken}}
+
+# =============================================================
+# REGOLE ANGOLARI PERSONALIZZATE — RF-AI1
+# =============================================================
+
+### Lista regole del trainer per un cliente
+GET {{base}}/trainer/clients/3/rules
+Authorization: Bearer {{trainerToken}}
+
+###
+
+### Crea o aggiorna regola per cliente+esercizio
+PUT {{base}}/trainer/clients/3/rules/1
+Authorization: Bearer {{trainerToken}}
+Content-Type: application/json
+
+{
+  "rules": [
+    { "joint": "knee", "min": 100, "max": 175, "phase": "down", "side": "both" }
+  ]
+}
+
+###
+
+### Elimina regola personalizzata
+DELETE {{base}}/trainer/clients/3/rules/1
+Authorization: Bearer {{trainerToken}}

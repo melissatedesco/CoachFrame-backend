@@ -11,13 +11,18 @@ vi.mock('../../models/exerciseModel.js', () => ({
         create: vi.fn(),
         update: vi.fn(),
         delete: vi.fn(),
+        isOwner: vi.fn(),
         addEquipment: vi.fn(),
         removeEquipment: vi.fn()
     }
 }))
+vi.mock('../../models/trainerRulesModel.js', () => ({
+    default: { getForUser: vi.fn() }
+}))
 vi.mock('../../config/db.js', () => ({ default: {} }))
 
 import Exercise from '../../models/exerciseModel.js'
+import TrainerRules from '../../models/trainerRulesModel.js'
 import exerciseRoutes from '../../routes/exerciseRoutes.js'
 
 const SECRET = 'super_secret_key_per_i_token_jwt'
@@ -123,5 +128,53 @@ describe('POST /api/exercises', () => {
 
         expect(res.status).toBe(201)
         expect(res.body.id).toBe(10)
+    })
+})
+
+describe('GET /api/exercises/:id/rules', () => {
+    beforeEach(() => vi.clearAllMocks())
+
+    const regolaDefault = [{ joint: 'knee', min: 70, max: 175, phase: 'down' }]
+
+    it('risponde 401 senza token', async () => {
+        const res = await request(app).get('/api/exercises/1/rules')
+        expect(res.status).toBe(401)
+    })
+
+    it('risponde 404 se esercizio non esiste', async () => {
+        Exercise.findById.mockResolvedValue(null)
+
+        const res = await request(app)
+            .get('/api/exercises/999/rules')
+            .set('Authorization', `Bearer ${tokenUser}`)
+
+        expect(res.status).toBe(404)
+    })
+
+    it('restituisce le regole di default se non c\'è override trainer', async () => {
+        Exercise.findById.mockResolvedValue({ ...esercizioMock, angle_rules: regolaDefault })
+        TrainerRules.getForUser.mockResolvedValue(null)
+
+        const res = await request(app)
+            .get('/api/exercises/1/rules')
+            .set('Authorization', `Bearer ${tokenUser}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body.source).toBe('default')
+        expect(res.body.rules).toEqual(regolaDefault)
+    })
+
+    it('restituisce l\'override del trainer se presente', async () => {
+        const regolaOverride = [{ joint: 'knee', min: 100, max: 175, phase: 'down' }]
+        Exercise.findById.mockResolvedValue({ ...esercizioMock, angle_rules: regolaDefault })
+        TrainerRules.getForUser.mockResolvedValue(regolaOverride)
+
+        const res = await request(app)
+            .get('/api/exercises/1/rules')
+            .set('Authorization', `Bearer ${tokenUser}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body.source).toBe('trainer')
+        expect(res.body.rules[0].min).toBe(100)
     })
 })

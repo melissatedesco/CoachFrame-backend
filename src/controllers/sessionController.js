@@ -1,4 +1,5 @@
 import Session from '../models/sessionModel.js'
+import SessionSets from '../models/sessionSetsModel.js'
 
 // POST /api/sessions — inizia una sessione (RF-P1)
 export const startSession = async (req, res, next) => {
@@ -91,4 +92,34 @@ export const getExerciseHistory = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+}
+
+// POST /api/sessions/:sessionId/exercises/:seId/sets — salva dati di una serie (RF-AI2)
+export const logSet = async (req, res, next) => {
+    const { set_number, reps_done, angle_data, form_score } = req.body
+    if (set_number == null || reps_done == null) {
+        return res.status(400).json({ message: 'set_number e reps_done sono obbligatori.' })
+    }
+    try {
+        const session = await Session.findById(req.params.sessionId)
+        if (!session) return res.status(404).json({ message: 'Sessione non trovata.' })
+        if (session.user_id !== req.user.id) {
+            return res.status(403).json({ message: 'Non sei autorizzato.' })
+        }
+        const id = await SessionSets.add(req.params.seId, set_number, reps_done, angle_data, form_score)
+        res.status(201).json({ message: 'Serie registrata.', id })
+    } catch (error) { next(error) }
+}
+
+// GET /api/sessions/:sessionId/exercises/:seId/sets — dettaglio serie per dashboard trainer (RF-AI2)
+export const getSets = async (req, res, next) => {
+    try {
+        const session = await Session.findById(req.params.sessionId)
+        if (!session) return res.status(404).json({ message: 'Sessione non trovata.' })
+        if (session.user_id !== req.user.id && req.user.role !== 'trainer' && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Non sei autorizzato.' })
+        }
+        const sets = await SessionSets.getBySessionExercise(req.params.seId)
+        res.json(sets)
+    } catch (error) { next(error) }
 }

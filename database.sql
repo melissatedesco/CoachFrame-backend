@@ -140,6 +140,33 @@ CREATE TABLE IF NOT EXISTS program_assignments (
     FOREIGN KEY (trainer_id)  REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Regole d'angolo personalizzate dal trainer per singolo cliente (RF-AI1)
+-- Stesso formato JSON di exercises.angle_rules, ma sovrascrivono il default per quel cliente
+CREATE TABLE IF NOT EXISTS trainer_rules (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    trainer_id INT NOT NULL,
+    client_id INT NOT NULL,
+    exercise_id INT NOT NULL,
+    rules JSON NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_trainer_client_exercise (trainer_id, client_id, exercise_id),
+    FOREIGN KEY (trainer_id)  REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (client_id)   REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
+);
+
+-- Dettaglio per singola serie con dati angolari da MediaPipe (RF-AI2)
+-- angle_data es: {"knee_min":85,"knee_avg":92,"failures":[{"rep":3,"angle":110}]}
+CREATE TABLE IF NOT EXISTS session_exercise_sets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    session_exercise_id INT NOT NULL,
+    set_number TINYINT UNSIGNED NOT NULL,
+    reps_done INT NOT NULL DEFAULT 0,
+    angle_data JSON,
+    form_score TINYINT UNSIGNED,
+    FOREIGN KEY (session_exercise_id) REFERENCES session_exercises(id) ON DELETE CASCADE
+);
+
 -- Token per il reset della password (RF-A5)
 CREATE TABLE IF NOT EXISTS password_resets (
     id INT AUTO_INCREMENT PRIMARY KEY,
