@@ -7,6 +7,15 @@
 @token = INCOLLA_IL_TOKEN_QUI
 @trainerToken = INCOLLA_IL_TOKEN_TRAINER_QUI
 
+### ID da aggiornare in base al DB
+@equipmentId = 1
+@exerciseId = 1
+@programId = 1
+@sessionId = 1
+@sessionExerciseId = 1
+@clientId = 3
+@assignmentId = 1
+
 # =============================================================
 # AUTH
 # =============================================================
@@ -119,13 +128,13 @@ Authorization: Bearer {{token}}
 ###
 
 ### Aggiungi attrezzo
-POST {{base}}/equipment/mine/1
+POST {{base}}/equipment/mine/{{equipmentId}}
 Authorization: Bearer {{token}}
 
 ###
 
 ### Rimuovi attrezzo
-DELETE {{base}}/equipment/mine/1
+DELETE {{base}}/equipment/mine/{{equipmentId}}
 Authorization: Bearer {{token}}
 
 # =============================================================
@@ -157,13 +166,13 @@ Authorization: Bearer {{token}}
 ###
 
 ### Dettaglio esercizio
-GET {{base}}/exercises/1
+GET {{base}}/exercises/{{exerciseId}}
 Authorization: Bearer {{token}}
 
 ###
 
 ### Regole angolari effettive per l'utente (override trainer o default) — RF-AI1
-GET {{base}}/exercises/1/rules
+GET {{base}}/exercises/{{exerciseId}}/rules
 Authorization: Bearer {{token}}
 
 ###
@@ -200,7 +209,7 @@ Authorization: Bearer {{token}}
 ###
 
 ### Dettaglio scheda
-GET {{base}}/programs/1
+GET {{base}}/programs/{{programId}}
 Authorization: Bearer {{token}}
 
 ###
@@ -243,7 +252,7 @@ Content-Type: application/json
 ###
 
 ### Chiudi sessione
-PATCH {{base}}/sessions/1/close
+PATCH {{base}}/sessions/{{sessionId}}/close
 Authorization: Bearer {{token}}
 
 ###
@@ -261,18 +270,18 @@ Authorization: Bearer {{token}}
 ###
 
 ### Dettaglio sessione
-GET {{base}}/sessions/1
+GET {{base}}/sessions/{{sessionId}}
 Authorization: Bearer {{token}}
 
 ###
 
 ### Log esercizio in sessione
-POST {{base}}/sessions/1/exercises
+POST {{base}}/sessions/{{sessionId}}/exercises
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "exercise_id": 1,
+  "exercise_id": {{exerciseId}},
   "sets_done": 3,
   "reps_done": 10,
   "form_score": 85
@@ -281,7 +290,7 @@ Content-Type: application/json
 ###
 
 ### Salva dati di una serie con angoli MediaPipe — RF-AI2
-POST {{base}}/sessions/1/exercises/1/sets
+POST {{base}}/sessions/{{sessionId}}/exercises/{{sessionExerciseId}}/sets
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -299,13 +308,13 @@ Content-Type: application/json
 ###
 
 ### Dettaglio serie (visibile al trainer) — RF-AI2
-GET {{base}}/sessions/1/exercises/1/sets
+GET {{base}}/sessions/{{sessionId}}/exercises/{{sessionExerciseId}}/sets
 Authorization: Bearer {{trainerToken}}
 
 ###
 
 ### Trend storico di un esercizio
-GET {{base}}/sessions/exercises/1/history
+GET {{base}}/sessions/exercises/{{exerciseId}}/history
 Authorization: Bearer {{token}}
 
 # =============================================================
@@ -336,43 +345,43 @@ Content-Type: application/json
 ###
 
 ### Rimuovi cliente
-DELETE {{base}}/trainer/clients/3
+DELETE {{base}}/trainer/clients/{{clientId}}
 Authorization: Bearer {{trainerToken}}
 
 ###
 
 ### Stats di un cliente
-GET {{base}}/trainer/clients/3/stats
+GET {{base}}/trainer/clients/{{clientId}}/stats
 Authorization: Bearer {{trainerToken}}
 
 ###
 
 ### Sessioni di un cliente
-GET {{base}}/trainer/clients/3/sessions
+GET {{base}}/trainer/clients/{{clientId}}/sessions
 Authorization: Bearer {{trainerToken}}
 
 ###
 
 ### Progressi dettagliati di un cliente
-GET {{base}}/trainer/clients/3/progress
+GET {{base}}/trainer/clients/{{clientId}}/progress
 Authorization: Bearer {{trainerToken}}
 
 ###
 
 ### Schede assegnate a un cliente
-GET {{base}}/trainer/clients/3/assignments
+GET {{base}}/trainer/clients/{{clientId}}/assignments
 Authorization: Bearer {{trainerToken}}
 
 ###
 
 ### Assegna scheda a un cliente
-POST {{base}}/trainer/clients/3/assign/1
+POST {{base}}/trainer/clients/{{clientId}}/assign/{{programId}}
 Authorization: Bearer {{trainerToken}}
 
 ###
 
 ### Rimuovi assegnazione scheda
-DELETE {{base}}/trainer/assignments/1
+DELETE {{base}}/trainer/assignments/{{assignmentId}}
 Authorization: Bearer {{trainerToken}}
 
 # =============================================================
@@ -380,13 +389,13 @@ Authorization: Bearer {{trainerToken}}
 # =============================================================
 
 ### Lista regole del trainer per un cliente
-GET {{base}}/trainer/clients/3/rules
+GET {{base}}/trainer/clients/{{clientId}}/rules
 Authorization: Bearer {{trainerToken}}
 
 ###
 
 ### Crea o aggiorna regola per cliente+esercizio
-PUT {{base}}/trainer/clients/3/rules/1
+PUT {{base}}/trainer/clients/{{clientId}}/rules/{{exerciseId}}
 Authorization: Bearer {{trainerToken}}
 Content-Type: application/json
 
@@ -399,5 +408,5 @@ Content-Type: application/json
 ###
 
 ### Elimina regola personalizzata
-DELETE {{base}}/trainer/clients/3/rules/1
+DELETE {{base}}/trainer/clients/{{clientId}}/rules/{{exerciseId}}
 Authorization: Bearer {{trainerToken}}
