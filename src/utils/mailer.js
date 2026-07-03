@@ -12,12 +12,12 @@ const transporter = nodemailer.createTransport({
 
 export const sendPasswordResetEmail = async (to, resetUrl) => {
     await transporter.sendMail({
-        from: process.env.EMAIL_FROM || 'FitFrame <noreply@fitframe.it>',
+        from: process.env.EMAIL_FROM || 'CoachFrame <noreply@coachframe.it>',
         to,
-        subject: 'Reset della tua password FitFrame',
+        subject: 'Reset della tua password CoachFrame',
         html: `
             <h2>Reset password</h2>
-            <p>Hai richiesto di reimpostare la password del tuo account FitFrame.</p>
+            <p>Hai richiesto di reimpostare la password del tuo account CoachFrame.</p>
             <p>Clicca il link qui sotto (valido per 1 ora):</p>
             <a href="${resetUrl}" style="background:#0d6efd;color:#fff;padding:10px 20px;border-radius:5px;text-decoration:none">
                 Reimposta password

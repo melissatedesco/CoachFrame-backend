@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    res.json({ message: "Benvenuto nell'APP di FitFrame! Il Coach virtuale è attivo 🏋️‍♂️" });
+    res.json({ message: "Benvenuto nell'APP di CoachFrame! Il Coach virtuale è attivo 🏋️‍♂️" });
 });
 
 app.use('/api/auth',      authRoutes);
