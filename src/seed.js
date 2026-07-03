@@ -4,10 +4,10 @@ import db from './config/db.js'
 // ─── UTENTI ────────────────────────────────────────────────────────────────
 
 const users = [
-    { name: 'Admin',    surname: 'FitFrame', email: 'admin@fitframe.it',   password: 'Admin123!',  role: 'admin' },
-    { name: 'Melissa',  surname: 'Tedesco',  email: 'melissa@fitframe.it', password: 'User123!',   role: 'trainer' },
-    { name: 'Marco',    surname: 'Bianchi',  email: 'marco@fitframe.it',   password: 'User123!',   role: 'user'  },
-    { name: 'Sofia',    surname: 'Ricci',    email: 'sofia@fitframe.it',   password: 'User123!',   role: 'user'  },
+    { name: 'Admin',    surname: 'CoachFrame', email: 'admin@coachframe.it',   password: 'Admin123!',  role: 'admin' },
+    { name: 'Melissa',  surname: 'Tedesco',    email: 'melissa@coachframe.it', password: 'User123!',   role: 'trainer' },
+    { name: 'Marco',    surname: 'Bianchi',    email: 'marco@coachframe.it',   password: 'User123!',   role: 'user'  },
+    { name: 'Sofia',    surname: 'Ricci',      email: 'sofia@coachframe.it',   password: 'User123!',   role: 'user'  },
 ]
 
 // ─── ATTREZZATURA ──────────────────────────────────────────────────────────
@@ -572,21 +572,21 @@ async function seed() {
     // 3. ATTREZZI POSSEDUTI DAGLI UTENTI
     console.log('\n🎒 Assegnazione attrezzi agli utenti...')
     // Melissa: corpo libero + sedia + bottiglie + banda
-    const melissaId = userIds['melissa@fitframe.it']
+    const melissaId = userIds['melissa@coachframe.it']
     for (const eqIdx of [EQ.LIBERO, EQ.SEDIA, EQ.BOTTIGLIE, EQ.BANDA]) {
         await db.execute('INSERT INTO user_equipment (user_id, equipment_id) VALUES (?, ?)', [melissaId, eqIds[eqIdx]])
     }
     console.log('   ✓ Melissa: corpo libero, sedia, bottiglie, banda')
 
     // Marco: tutto
-    const marcoId = userIds['marco@fitframe.it']
+    const marcoId = userIds['marco@coachframe.it']
     for (const eqIdx of Object.keys(EQ).map(k => EQ[k])) {
         await db.execute('INSERT IGNORE INTO user_equipment (user_id, equipment_id) VALUES (?, ?)', [marcoId, eqIds[eqIdx]])
     }
     console.log('   ✓ Marco: tutta l\'attrezzatura')
 
     // Sofia: corpo libero + muro
-    const sofiaId = userIds['sofia@fitframe.it']
+    const sofiaId = userIds['sofia@coachframe.it']
     for (const eqIdx of [EQ.LIBERO, EQ.MURO]) {
         await db.execute('INSERT INTO user_equipment (user_id, equipment_id) VALUES (?, ?)', [sofiaId, eqIds[eqIdx]])
     }

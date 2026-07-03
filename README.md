@@ -1,7 +1,6 @@
-# FitApp-backend
-# FitFrame API
+# CoachFrame API
 
-Backend REST per FitFrame, l'allenatore virtuale a casa (anche per trainer e clienti).
+Backend REST per CoachFrame, l'allenatore virtuale a casa (anche per trainer e clienti).
 Stack: **Node.js + Express + MySQL** (driver `mysql2`).
 
 ## Requisiti
@@ -14,10 +13,10 @@ Stack: **Node.js + Express + MySQL** (driver `mysql2`).
    `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`).
 3. Crea il database e le tabelle:
    ```sql
-   CREATE DATABASE fitframe CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE DATABASE coachframe_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
    ```bash
-   mysql -u root -p fitframe < db/schema.sql
+   mysql -u root -p coachframe_db < db/schema.sql
    ```
 4. `npm run dev`
 

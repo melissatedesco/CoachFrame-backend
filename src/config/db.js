@@ -16,14 +16,23 @@ const pool = createPool({
 // esporta il pool convertito in "promises" per poter usare async/await nel codice
 const promisePool = pool.promise()
 
-// testa la connessione all'avvio
-pool.getConnection((err, connection) => {
-    if (err) {
-        console.error("Errore di connessione al database MySQL:", err.message)
-    } else {
-        console.log("Connessione al database MySQL avvenuta con successo")
-        connection.release()
-    }
-})
+// testa la connessione all'avvio, riprovando se il DB non è ancora pronto
+const testConnection = (retries = 5, delay = 2000) => {
+    pool.getConnection((err, connection) => {
+        if (err) {
+            if (retries > 0) {
+                console.warn(`Connessione al database non riuscita, nuovo tentativo tra ${delay / 1000}s (${retries} rimasti)...`)
+                setTimeout(() => testConnection(retries - 1, delay), delay)
+            } else {
+                console.error("Errore di connessione al database MySQL:", err.message)
+            }
+        } else {
+            console.log("Connessione al database MySQL avvenuta con successo")
+            connection.release()
+        }
+    })
+}
+
+testConnection()
 
 export default promisePool

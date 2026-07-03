@@ -1,5 +1,5 @@
 -- ============================================================
--- FitFrame — schema completo del database
+-- CoachFrame — schema completo del database
 -- ============================================================
 
 -- Tabella utenti

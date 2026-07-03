@@ -1,4 +1,4 @@
-### FitFrame API — REST Client (VS Code)
+### CoachFrame API — REST Client (VS Code)
 ### Installa l'estensione "REST Client" (humao.rest-client) per usare questo file
 
 @base = http://localhost:5000/api
@@ -27,7 +27,7 @@ Content-Type: application/json
 {
   "name": "Test",
   "surname": "Utente",
-  "email": "test@fitframe.it",
+  "email": "test@coachframe.it",
   "password": "Test1234!"
 }
 
@@ -38,7 +38,7 @@ POST {{base}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "marco@fitframe.it",
+  "email": "marco@coachframe.it",
   "password": "User123!"
 }
 
@@ -49,7 +49,7 @@ POST {{base}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "melissa@fitframe.it",
+  "email": "melissa@coachframe.it",
   "password": "User123!"
 }
 
@@ -60,7 +60,7 @@ POST {{base}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@fitframe.it",
+  "email": "admin@coachframe.it",
   "password": "Admin123!"
 }
 
@@ -77,7 +77,7 @@ POST {{base}}/auth/forgot-password
 Content-Type: application/json
 
 {
-  "email": "marco@fitframe.it"
+  "email": "marco@coachframe.it"
 }
 
 ###
@@ -339,7 +339,7 @@ Authorization: Bearer {{trainerToken}}
 Content-Type: application/json
 
 {
-  "email": "marco@fitframe.it"
+  "email": "marco@coachframe.it"
 }
 
 ###
