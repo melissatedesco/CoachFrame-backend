@@ -16,13 +16,13 @@ import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(helmet());
+app.use(helmet({ strictTransportSecurity: false }));
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',')
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) callback(null, true)
-        else callback(new Error('Origine non autorizzata dal CORS.'))
+        else callback(new Error(`Origine non autorizzata dal CORS: ${origin}`))
     },
     credentials: true
 }));
