@@ -242,15 +242,24 @@ describe('GET /api/trainer/clients/:clientId/progress', () => {
     })
 })
 
-// ─── POST /clients/:clientId/assign/:programId ──────────────────────────────
-describe('POST /api/trainer/clients/:clientId/assign/:programId', () => {
+// ─── POST /clients/:clientId/assignments ────────────────────────────────────
+describe('POST /api/trainer/clients/:clientId/assignments', () => {
     beforeEach(() => vi.clearAllMocks())
+
+    it('risponde 400 se programId mancante', async () => {
+        const res = await request(app)
+            .post('/api/trainer/clients/3/assignments')
+            .set('Authorization', `Bearer ${tokenTrainer}`)
+            .send({})
+        expect(res.status).toBe(400)
+    })
 
     it('risponde 403 se cliente non è mio', async () => {
         Trainer.isMyClient.mockResolvedValue(false)
         const res = await request(app)
-            .post('/api/trainer/clients/3/assign/1')
+            .post('/api/trainer/clients/3/assignments')
             .set('Authorization', `Bearer ${tokenTrainer}`)
+            .send({ programId: 1 })
         expect(res.status).toBe(403)
     })
 
@@ -258,8 +267,9 @@ describe('POST /api/trainer/clients/:clientId/assign/:programId', () => {
         Trainer.isMyClient.mockResolvedValue(true)
         Trainer.assignProgram.mockResolvedValue({ error: 'Programma già assegnato a questo cliente.' })
         const res = await request(app)
-            .post('/api/trainer/clients/3/assign/1')
+            .post('/api/trainer/clients/3/assignments')
             .set('Authorization', `Bearer ${tokenTrainer}`)
+            .send({ programId: 1 })
         expect(res.status).toBe(400)
     })
 
@@ -267,8 +277,9 @@ describe('POST /api/trainer/clients/:clientId/assign/:programId', () => {
         Trainer.isMyClient.mockResolvedValue(true)
         Trainer.assignProgram.mockResolvedValue({ id: 5 })
         const res = await request(app)
-            .post('/api/trainer/clients/3/assign/1')
+            .post('/api/trainer/clients/3/assignments')
             .set('Authorization', `Bearer ${tokenTrainer}`)
+            .send({ programId: 1 })
         expect(res.status).toBe(201)
         expect(res.body.id).toBe(5)
     })

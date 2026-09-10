@@ -28,7 +28,7 @@ router.get('/clients/:clientId/assignments',           getClientAssignments)
 router.get('/clients/:clientId/progress',              getClientProgress)
 
 // assegnazione programmi
-router.post('/clients/:clientId/assign/:programId',    assignProgram)
+router.post('/clients/:clientId/assignments',          assignProgram)
 router.delete('/assignments/:assignmentId',            removeAssignment)
 
 // regole d'angolo personalizzate (RF-AI1)

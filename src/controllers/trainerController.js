@@ -48,7 +48,9 @@ export const getClientSessions = async (req, res, next) => {
 
 export const assignProgram = async (req, res, next) => {
     try {
-        const { clientId, programId } = req.params
+        const { clientId } = req.params
+        const { programId } = req.body
+        if (!programId) return res.status(400).json({ message: 'programId obbligatorio.' })
         const isMine = await Trainer.isMyClient(req.user.id, clientId)
         if (!isMine && req.user.role !== 'admin') return res.status(403).json({ message: 'Accesso negato.' })
         const result = await Trainer.assignProgram(req.user.id, clientId, programId)
